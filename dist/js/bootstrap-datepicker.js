@@ -13,6 +13,21 @@
         factory(jQuery);
     }
 }(function($, undefined){
+  Date.prototype.getWeek = function () {
+    // Get the first date of year
+    var firstDate = new Date(this.getFullYear(), 0, 1);
+    // Get the day of the first date of year
+    var firstDay = firstDate.getDay();
+    // Get the first date of the first week in this year
+    var firstWeekDate = null;
+    if (firstDay < 5) firstWeekDate = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate() - firstDate.getDay());
+    else firstWeekDate = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate() + (7 - firstDate.getDay()));
+
+    var dValue = (this - firstWeekDate) / 864e5 / 7;
+
+    if (dValue < 0) return 53;
+    else return Math.ceil(dValue);
+  };
 	function UTCDate(){
 		return new Date(Date.UTC.apply(Date, arguments));
 	}
@@ -1760,7 +1775,7 @@
 				navStep: 1000
 			}
 		],
-		validParts: /dd?|DD?|mm?|MM?|yy(?:yy)?/g,
+		validParts: /ww?|e|EE?|dd?|DD?|mm?|MM?|yy(?:yy)?/g,
 		nonpunctuation: /[^ -\/:-@\u5e74\u6708\u65e5\[-`{-~\t\n\r]+/g,
 		parseFormat: function(format){
 			if (typeof format.toValue === 'function' && typeof format.toDisplay === 'function')
@@ -1900,16 +1915,17 @@
 			return date;
 		},
 		formatDate: function(date, format, language){
-			if (!date)
-				return '';
-			if (typeof format === 'string')
-				format = DPGlobal.parseFormat(format);
-			if (format.toDisplay)
-                return format.toDisplay(date, format, language);
-            var val = {
+			if (!date) return '';
+			if (typeof format === 'string') format = DPGlobal.parseFormat(format);
+			if (format.toDisplay) return format.toDisplay(date, format, language);
+      var val = {
 				d: date.getUTCDate(),
 				D: dates[language].daysShort[date.getUTCDay()],
 				DD: dates[language].days[date.getUTCDay()],
+        w: date.getWeek(),
+        e: date.getDay() + 1,
+        E: dates[language].daysShort[date.getDay()],
+        EE: dates[language].days[date.getDay()],
 				m: date.getUTCMonth() + 1,
 				M: dates[language].monthsShort[date.getUTCMonth()],
 				MM: dates[language].months[date.getUTCMonth()],
@@ -1918,6 +1934,7 @@
 			};
 			val.dd = (val.d < 10 ? '0' : '') + val.d;
 			val.mm = (val.m < 10 ? '0' : '') + val.m;
+			val.ww = (val.w < 10 ? '0' : '') + val.w;
 			date = [];
 			var seps = $.extend([], format.separators);
 			for (var i=0, cnt = format.parts.length; i <= cnt; i++){
