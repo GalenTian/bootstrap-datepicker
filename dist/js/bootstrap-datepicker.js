@@ -830,7 +830,7 @@
 			var dowCnt = this.o.weekStart,
 				html = '<tr>';
 			if (this.o.calendarWeeks){
-				html += '<th class="cw">&#160;</th>';
+				html += '<th class="cw">KW</th>';
 			}
 			while (dowCnt < this.o.weekStart + 7){
 				html += '<th class="dow';
